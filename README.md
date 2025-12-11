@@ -1,200 +1,142 @@
-# TP8 Python – Gestionnaires de Contexte (Context Managers)
+# TP9 Python – Mini Projet POO + SQLite & MySQL
 
 [![Python](https://img.shields.io/badge/Python-3.x-blue)](https://www.python.org/)
+[![Database](https://img.shields.io/badge/DB-SQLite%20%7C%20MySQL-orange)]()
 
-Ce projet regroupe **les trois exercices du TP8**, dédiés à la maîtrise des **gestionnaires de contexte** en Python : utilisation de `__enter__` / `__exit__`, du module **contextlib**, et de la classe **ExitStack** pour gérer plusieurs ressources.
+Ce dépôt contient le **Mini Projet du TP9** portant sur la **Programmation Orientée Objet** et la **connexion aux bases de données** en Python. Le but est de comparer deux types de stockage :
 
----
-
-## 📂 Contenu du TP
-
-Le TP8 est organisé en trois exercices :
-
-* **EXERCICE 1 : Gestionnaires de contexte fondamentaux**
-* **EXERCICE 2 : Context managers avancés + ExitStack**
-* **EXERCICE 3 : Traitement de fichiers CSV avec logs automatiques**
-
-Chaque exercice possède :
-
-* un dossier dédié,
-* les fichiers Python nécessaires,
-* un script de test `test.py` pour valider le comportement.
+* **SQLite** (base embarquée)
+* **MySQL** (base distante)
 
 ---
 
-# 🧪 EXERCICE 1 — Gestionnaires de contexte fondamentaux
+## 📌 Objectif du mini-projet
 
-### 🎯 Objectif
+Développer un système complet capable de gérer des **Produits** et des **Clients**, avec :
 
-Comprendre comment créer un gestionnaire de contexte à la main (`__enter__` & `__exit__`) puis le réécrire avec `contextlib.contextmanager`. Enfin, apprendre à gérer plusieurs fichiers simultanément avec `ExitStack`.
+* Une structure objet claire (classes `Produit` et `Client`)
+* Deux modules DAO indépendants
+
+  * `sqlite_dao.py`
+  * `mysql_dao.py`
+* Les mêmes méthodes CRUD pour les deux bases
+* Un fichier principal `main.py` permettant de tester les opérations via un menu CLI
 
 ---
 
-## 📌 Partie 1 — Implémentation manuelle
-
-Création de `TempFileWriter` :
-
-* ouverture d’un fichier temporaire,
-* écriture,
-* suppression automatique à la sortie du bloc `with`.
-
-Le test affiche :
+## 📂 Structure du projet
 
 ```
-Testing TempFileWriter
-TempFileWriter test completed.
+TP9/
+│
+├── produit.py
+├── client.py
+│
+├── sqlite_dao.py
+├── mysql_dao.py
+│
+├── main.py
+│
+└── README.md
 ```
 
 ---
 
-## 📌 Partie 2 — Version contextlib
+## 🧱 Fonctionnalités implémentées
 
-Réécriture sous forme de générateur décoré avec `@contextmanager`.
+### ✔️ 1. Gestion des entités métier
 
-Test :
+* Classe **Produit** : `id`, `nom`, `prix`
+* Classe **Client** : `id`, `nom`, `email`
 
-```
-Testing temp_file context manager
-temp_file test completed.
-```
+### ✔️ 2. DAO SQLite (`sqlite_dao.py`)
 
----
+* Connexion automatique à **boutique.db**
+* Création des tables si nécessaires
+* Opérations :
 
-## 📌 Partie 3 — Gestion multiple avec ExitStack
+  * Ajouter produit / client
+  * Lister produits / clients
+  * Rechercher client par email
+  * Modifier prix d’un produit
 
-`ExitStack` permet d’ouvrir **n fichiers dynamiquement** et garantit leur fermeture même en cas d’erreur.
+### ✔️ 3. DAO MySQL (`mysql_dao.py`)
 
-Résultat du test :
+* Connexion via `mysql-connector-python`
+* Même interface et mêmes méthodes que SQLite
+* Permet de passer de MySQL ↔ SQLite sans modifier `main.py`
 
-```
-File a.txt created successfully
-File b.txt created successfully
-File c.txt created successfully
-```
+### ✔️ 4. Menu terminal (`main.py`)
 
----
-
-# 🧪 EXERCICE 2 — Combinaison Connexion + Logs + ExitStack
-
-### 🎯 Objectif
-
-Créer un gestionnaire de contexte simulant une **connexion à un service** tout en écrivant des logs.
-Utilisation avancée de `ExitStack` pour composer plusieurs ressources.
-
----
-
-## 📌 Partie 1 — ConnectionManager
-
-Ce gestionnaire :
-
-* affiche un message de connexion,
-* retourne l’objet lui-même,
-* affiche un message de déconnexion même si une erreur survient.
-
-Sortie :
+Permet de tester toutes les opérations CRUD :
 
 ```
-[2025-12-11 21:38:51] Connexion à Serveur X établie.
-[2025-12-11 21:38:51] Déconnexion de Serveur X.
+1 - Ajouter produit
+2 - Ajouter client
+3 - Lister produits
+4 - Lister clients
+5 - Rechercher client par email
+6 - Modifier prix d’un produit
+0 - Quitter
 ```
 
 ---
 
-## 📌 Partie 2 — ExitStack avec logs
+## 🚀 Exécution
 
-On ouvre simultanément :
+### 1️⃣ Installer les dépendances
 
-* un fichier log,
-* une connexion simulée.
+`bash\pip install mysql-connector-python`
 
-Le test confirme :
+### 2️⃣ Exécuter le projet
 
-```
-task_with_logging completed
---- log.txt content ---
-[...] Tâche effectuée sur Serveur X
+```bash
+python main.py
 ```
 
 ---
 
-## 📌 Partie 3 — Gestion des erreurs
+## 🧪 Exemple d’utilisation
 
-Le test force une exception volontaire :
-
-```
-Caught exception as expected: Erreur de traitement
-```
-
-Les logs montrent que la connexion est tout de même fermée proprement :
+### Ajout d’un produit
 
 ```
-Erreur détectée : RuntimeError — Erreur de traitement
-Déconnexion de Base Y.
+Nom : PC Portable
+Prix : 7500
+Produit ajouté avec succès.
 ```
 
----
-
-# 🧪 EXERCICE 3 — Traitement CSV + Logs
-
-### 🎯 Objectif
-
-Créer un système complet :
-
-* lecture d’un fichier CSV,
-* exécution d’opérations (add, subtract, multiply, divide),
-* gestion d’inconnues,
-* journalisation automatique ligne par ligne.
-
----
-
-## 📌 Fonctionnalités principales
-
-* Ouverture du CSV via un gestionnaire de contexte
-* Création d’un fichier journal `journal.log`
-* Enregistrement de chaque ligne traitée
-* Gestion d’erreurs métier (opération inconnue)
-
-Extrait du test :
+### Liste des produits
 
 ```
-Traitement add(10.0) -> 15.0
-Traitement subtract(5.0) -> 3.0
-Traitement multiply(3.0) -> 30.0
-Traitement divide(2.0) -> 1.0
+1 | PC Portable | 7500.0
+2 | Souris | 99.0
 ```
 
-Journal généré :
+### Recherche d’un client
 
 ```
-[2025-12-11] Ligne traitée (4): ['multiply', '3']
-[2025-12-11] Erreur traitement ligne 6: Opération inconnue: unknown
+Email : test@mail.com
+Client trouvé : test@mail.com (Mahmoud)
 ```
 
 ---
 
-# 📘 Points pédagogiques du TP
+## 📘 Critères d’évaluation respectés
 
-✔ Compréhension fine de la mécanique `__enter__` / `__exit__`
-✔ Usage du module standard `contextlib`
-✔ Gestions avancées avec `ExitStack`
-✔ Garanties de fermeture automatique des ressources
-✔ Gestion propre des erreurs dans les blocs `with`
-✔ Production de journaux pendant le traitement de tâches
-
----
-
-# 💡 Extensions proposées
-
-* Ajout de décorateurs pour automatiser les logs
-* Mixins pour horodatage automatique
-* Gestion parallèle de plusieurs connexions
-* Système complet d’audit avec rotation des logs
+* ✔️ Structuration du code
+* ✔️ Utilisation correcte des classes et objets
+* ✔️ Implémentation des requêtes SQL
+* ✔️ Deux backends DB interchangeables
+* ✔️ Gestion des erreurs (connexion, requêtes)
+* ✔️ Menu CLI fonctionnel
 
 ---
 
-# 👨‍💻 Auteur
+## 👤 Auteur
 
-**Nom :** Mahmoud Moukouch – 2333447
-**Email :** [m.moukouch2471@uca.ac.ma](mailto:m.moukouch2471@uca.ac.ma)
+**Mahmoud Moukouch – 2333447**
+[Email] [m.moukouch2471@uca.ac.ma](mailto:m.moukouch2471@uca.ac.ma)
+**GitHub :** [https://github.com/M4ds1ck](https://github.com/M4ds1ck)
 
-**Projet :** TP8 Python — Gestionnaires de Contexte
+Projet : **TP9 – Mini Projet POO + Base de données**
